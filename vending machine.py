@@ -11,7 +11,6 @@ import pyttsx3
 import time
 import random
 
-# Initialize text-to-speech engine
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[1].id)
@@ -20,10 +19,10 @@ def speak(audio):
     engine.say(audio)
     engine.runAndWait()
 
-# Connect to the database
+
 db = sqlite3.connect('C:/Users/vince/.spyder-py3/Vending Machine.db')
 
-# Function to display the snack menu
+
 def DisplayMenu():
     query = "SELECT * FROM product;"
     item_information = db.execute(query)
@@ -34,13 +33,13 @@ def DisplayMenu():
         print(f"{item[0]:<10}{item[1]:<32}AED{item[2]:<10.2f}{item[3]:<10}")
     print(f"{'-'*60}")
 
-# Function to update stock
+
 def UpdateStock(code, quantity):
     query = "UPDATE product SET Stock = Stock - ? WHERE Code = ?;"
     db.execute(query, (quantity, code))
     db.commit()
 
-# Function to restock the vending machine dynamically
+
 def RestockMachine():
     code = input("Enter the product code to restock: ")
     quantity = int(input("Enter the quantity to restock: "))
@@ -50,7 +49,7 @@ def RestockMachine():
     print(f"\nThe product {code} has been restocked with {quantity} items.")
     speak(f"The product {code} has been restocked with {quantity} items.")
 
-# Inventory alert when stock is low
+
 def InventoryAlert():
     query = "SELECT code, item, stock FROM product WHERE Stock <= 3;"
     low_stock_items = db.execute(query).fetchall()
@@ -62,10 +61,10 @@ def InventoryAlert():
         print("All items are sufficiently stocked.")
         speak("All items are sufficiently stocked.")
 
-# Function to create user accounts (for simplicity, we will use a basic dictionary to simulate user data)
+
 users = {}
 
-# Function to log in or create a new account
+
 def login_or_create_account():
     print("Welcome! Please log in or create an account.")
     speak("Welcome! Please log in or create an account.")
@@ -99,12 +98,12 @@ def login_or_create_account():
         speak("Invalid action. Please try again.")
         return None
 
-# Main vending machine loop
+
 while True:
-    cart = []  # Holds selected items and quantities
+    cart = []  
     username = login_or_create_account()
     if username is None:
-        continue  # Restart if login fails
+        continue  
 
     DisplayMenu()
     speak("Welcome to Kel's Vending. Start selecting items.")
@@ -135,7 +134,7 @@ while True:
                 print(f"Stock available: {stock}")
                 speak(f"There are {stock} {name} available at the moment.")
         
-                while True:  # Loop until a valid quantity is entered
+                while True:  
                     try:
                         speak(f"How many {name} would you like to buy?")
                         quantity = int(input(f"How many {name} would you like to buy? "))
@@ -147,15 +146,15 @@ while True:
                                 print("Restocking the vending machine. Please wait 10 seconds...")
                                 speak("Restocking the vending machine. Please wait 10 seconds.")
                                 time.sleep(10)
-                                RestockMachine()  # Allow the user to restock the item
-                                snack = db.execute("SELECT * FROM product WHERE Code = ?", (selected_item,)).fetchone()  # Re-fetch snack data after restocking
+                                RestockMachine()  
+                                snack = db.execute("SELECT * FROM product WHERE Code = ?", (selected_item,)).fetchone()  
                                 print(f"Restocking completed. {name} is now available again.")
                                 speak(f"Restocking completed. {name} is now available again.")
-                                # Recheck stock after restocking and allow to continue
+                                
                                 if snack[3] >= quantity:
                                     print(f"You can now purchase {quantity} {name}.")
                                     speak(f"You can now purchase {quantity} {name}.")
-                                    break  # Exit the loop after successful purchase
+                                    break  
                                 else:
                                     print(f"Unfortunately, we still don't have enough {name} in stock.")
                                     speak(f"Unfortunately, we still don't have enough {name} in stock.")
@@ -169,7 +168,7 @@ while True:
                             cart.append((selected_item, name, price, quantity))
                             print(f"Added {quantity} {name} to your cart.")
                             speak(f"Added {quantity} {name} to your cart.")
-                            break  # Exit the loop after valid input
+                            break  
                     except ValueError:
                         print("Invalid input. Please enter a valid quantity.")
                         speak("Invalid input. Please enter a valid quantity.")
@@ -181,8 +180,8 @@ while True:
                     print("Restocking the vending machine. Please wait 10 seconds...")
                     speak("Restocking the vending machine. Please wait 10 seconds.")
                     time.sleep(10)
-                    RestockMachine()  # Allow the user to restock the item
-                    snack = db.execute("SELECT * FROM product WHERE Code = ?", (selected_item,)).fetchone()  # Re-fetch snack data after restocking
+                    RestockMachine()  
+                    snack = db.execute("SELECT * FROM product WHERE Code = ?", (selected_item,)).fetchone()  
                     print("You can now start again.")
                     speak("You can now start again.")
         else:
@@ -216,12 +215,12 @@ while True:
             print("Processing your purchase...")
             speak("Processing your purchase.")
 
-            # Update stock for each item in the cart
+            
             for code, name, price, quantity in cart:
                 UpdateStock(code, quantity)
 
-            # Update loyalty points dynamically
-            loyalty_points = random.randint(1, 5)  # Earn random points between 1 and 5
+            
+            loyalty_points = random.randint(1, 5)  
             if username in users:
                 users[username]["loyalty_points"] += loyalty_points
 
@@ -231,11 +230,10 @@ while True:
             print("Thank you for your purchase!")
             speak("Thank you for your purchase!")
 
-            # Ask if the user wants to continue or exit
             while True:
                 cont = input("\nWould you like to make another purchase? (yes/no): ").strip().lower()
                 if cont == 'yes':
-                    break  # Allow the user to continue purchasing
+                    break  
                 elif cont == 'no':
                     print("Thank you for using Kel's Vending. Have a great day!")
                     speak("Thank you for using Kel's Vending. Have a great day!")
@@ -244,13 +242,13 @@ while True:
                     print("Invalid input. Please enter 'yes' or 'no'.")
                     speak("Invalid input. Please enter yes or no.")
             
-            break  # Exit the payment loop and continue with the next iteration if 'yes' to purchase again
+            break
 
     except ValueError:
         print("Invalid input. Please enter a valid bill amount.")
         speak("Invalid input. Please enter a valid bill amount.")
 
-# Inventory alert after each transaction
+
 InventoryAlert()
 
 
