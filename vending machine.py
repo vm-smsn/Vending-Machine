@@ -4,7 +4,6 @@
 
 '''
 Welcome To Kel's Vending program!!!
-
 '''
 
 import sqlite3
@@ -53,7 +52,7 @@ def RestockMachine():
 
 # Inventory alert when stock is low
 def InventoryAlert():
-    query = "SELECT Code, Name, Stock FROM product WHERE Stock <= 3;"
+    query = "SELECT code, item, stock FROM product WHERE Stock <= 3;"
     low_stock_items = db.execute(query).fetchall()
     if low_stock_items:
         for item in low_stock_items:
@@ -100,20 +99,13 @@ def login_or_create_account():
         speak("Invalid action. Please try again.")
         return None
 
-# Function to log sales data
-def LogSale(cart, total_cost, username):
-    query = "INSERT INTO sales (item_code, quantity, total_cost, username) VALUES (?, ?, ?, ?);"
-    for code, name, price, quantity in cart:
-        db.execute(query, (code, quantity, total_cost, username))
-    db.commit()
-
 # Main vending machine loop
 while True:
     cart = []  # Holds selected items and quantities
     username = login_or_create_account()
     if username is None:
         continue  # Restart if login fails
-    
+
     DisplayMenu()
     speak("Welcome to Kel's Vending. Start selecting items.")
 
@@ -208,11 +200,7 @@ while True:
     speak(f"Your total cost is {total_cost} Dirhams.")
 
     total_cost = sum(item[2] * item[3] for item in cart)
-print("\nYour cart:")
-for code, name, price, quantity in cart:
-    print(f"{quantity} x {name} - AED{price:.2f} each")
-print(f"Total cost: AED{total_cost:.2f}")
-speak(f"Your total cost is {total_cost} Dirhams.")
+    break
 
 while True:
     try:
@@ -231,9 +219,6 @@ while True:
             # Update stock for each item in the cart
             for code, name, price, quantity in cart:
                 UpdateStock(code, quantity)
-
-            # Log the sale for the user account
-            LogSale(cart, total_cost, username)
 
             # Update loyalty points dynamically
             loyalty_points = random.randint(1, 5)  # Earn random points between 1 and 5
@@ -254,7 +239,7 @@ while True:
                 elif cont == 'no':
                     print("Thank you for using Kel's Vending. Have a great day!")
                     speak("Thank you for using Kel's Vending. Have a great day!")
-                    exit()  # Exit the program
+                    break
                 else:
                     print("Invalid input. Please enter 'yes' or 'no'.")
                     speak("Invalid input. Please enter yes or no.")
@@ -270,5 +255,4 @@ InventoryAlert()
 
 
 
-
- 
+                
